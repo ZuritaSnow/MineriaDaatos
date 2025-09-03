@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Densidades</title>
+  <link rel="stylesheet" href="../styles/style.css">
+</head>
+
+<body>
+
+  <!-- Encabezado con menu despegable -->
+  <div class = "encabezado">
+    <img src="../recursos/lapiz.png" alt = "Logo" class ="logo">
+    <h1>Simulador de Densidades</h1>
+    <div class = "opciones">
+      <label for = "menu"> Menu </label>
+      <select id = "menu">
+        <option value = "bernu">Bernulli</option>
+        <option value = "bino">Binomial</option>
+        <option value = "mult">Multinomial</option>
+        <option value = "exp">Exponencial</option>
+        <option value = "norm">Normal</option>
+        <option value = "gibbs">Método de Gebbs</option>
+      </select>
+      <br><br>
+    </div>
+  </div>
+  
+  <!-- Área principal -->
+  
+  <main class="main">
+      <div class="Contenido">
+        <div class="informacion"> 
+            <div id="Resultados ">
+              <div id = "resultados-header">
+              <span>Resultados de la Simulación</span>
+              <button id ="descargar-csv">Descargar CSV</button>
+              </div>
+                <p> Aquí van los resultados</p> 
+            </div> 
+        </div>
+        <div id="grafica"> 
+            <div id="tituloDinamico">
+                <h1> Aquí hay un título </h1> 
+            </div> 
+            <div id="inputs">
+                <p> Aquí apareceran las entradas </p>
+            </div>
+            <button id="iniciarSimulacion">Simular</button>
+            <div id="chart">
+              <p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>
+            </div>
+        </div>   
+      </div> 
+    </main>
+  
+  
+
+  <!-- Script opcional -->
+  <script src="../scripts/simulador.js"></script>
+</body>
+</html>
