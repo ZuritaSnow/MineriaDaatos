@@ -203,14 +203,76 @@ menu.addEventListener("change", () => {
                     <input type="text" id="num_experimentos">
                 </div>
                 <div class="input">
-                    <label>Tasa de ocurrencia del evento (λ)</label>
+                    <label>Tasa de ocurrencia del evento (λ > 0)</label>
                     <input type="text" id="lambda">
                 </div>
             `;
             // Poner título e inputs en el DOM
             tituloDinamico.innerHTML = html_titulo;
             inputs.innerHTML = html_inputs;
+
+            // Crear el botón dinámicamente
+            botones.innerHTML = ""; // Limpiar botones previos
+            boton.className = "btn";
+            boton.id = "button_bino";
+            boton.textContent = "Simular";
+            botones.appendChild(boton);
+
             grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
+            
+            boton.addEventListener("click", async () => {
+                const numExp = parseInt(document.getElementById("num_experimentos").value);
+                const tasa_ocurrencia = parseFloat(document.getElementById("lambda").value);
+
+                // Llamar a tu API en FastAPI
+                const response = await fetch("/exponencial", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        num_experimentos: numExp,
+                        tasa: tasa_ocurrencia
+                    })
+                });
+
+                const result = await response.json();
+
+                // Datos simulados
+                const valores = result.valores;
+                const tasa = result.tasa;
+
+                //limpiar el área de la gráfica antes de dibujar
+                grafica.innerHTML = "";
+
+                // Crear el histograma con los datos recibidos
+                const hist = {
+                    x: valores,
+                    type: "histogram",
+                    name: "Frecuencia simulada",
+                    opacity: 0.6,
+                    marker: {color: "#3498db"}
+                };
+
+
+                const layout = {
+                    title: {text: "Distribución Exponencial (Simulada vs Teórica)"},
+                    xaxis: {title: "x"},
+                    yaxis: {title: "Frecuencia"},
+                    barmode: "overlay"
+                };
+
+                Plotly.newPlot("chart", [hist], layout, {responsive: true});
+
+
+                // 2. Mostrar resultados como texto
+                resultados.innerHTML = `
+                    <h3>Resultados</h3>
+                    <p><b>Tasa (λ):</b> ${tasa}</p>
+                    <p><b>Total de experimentos:</b> ${result.total_experimentos}</p>
+                    <p><b>Primeros 10 valores simulados:</b> ${valores.slice(0, 10).map(v => v.toFixed(3)).join(", ")} ...</p>
+                `;
+            }
+            );
+
             break;
         
         case "norm":

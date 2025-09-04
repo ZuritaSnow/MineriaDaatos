@@ -4,6 +4,8 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from random import random
 from collections import Counter
+import math
+import numpy as np
 
 
 simulador = FastAPI()
@@ -88,4 +90,66 @@ async def binomial(data: BinomialInput):
         "total_experimentos": data.num_experimentos,
         "total_exitos": total_exitos,
         "total_fracasos": total_fracasos
+    }
+
+'''
+Endpoint para el simulador de Multinomial
+'''
+
+
+'''
+Endpoint para el simulador de Exponencial
+'''
+class ExponencialInput(BaseModel):
+    num_experimentos: int
+    tasa: float  # λ
+
+@simulador.post("/exponencial")
+async def exponencial(data: ExponencialInput):
+    if data.tasa <= 0:
+        return {"error": "La tasa debe ser mayor que 0."}
+
+    valores = []
+    us = []
+
+    for _ in range(data.num_experimentos):
+        u = random()
+        x = -math.log(1 - u) / data.tasa
+        valores.append(x)
+        us.append(u)
+
+    return {
+        "valores": valores,  # datos simulados
+        "us": us,
+        "tasa": data.tasa,
+        "total_experimentos": data.num_experimentos,
+    }
+
+'''
+Endpoint para el simulador de Normal
+'''
+class NormalInput(BaseModel):
+    num_experimentos: int
+    media: float
+    desviacion_estandar: float
+
+@simulador.post("/normal")
+async def normal(data: NormalInput):
+    if data.desviacion_estandar <= 0:
+        return {"error": "La desviación estándar debe ser mayor que 0."}
+
+    valores = []
+
+    for _ in range(data.num_experimentos):
+        u1 = random()
+        u2 = random()
+        z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
+        x = data.media + data.desviacion_estandar * z0
+        valores.append(x)
+
+    return {
+        "valores": valores,
+        "media": data.media,
+        "desviacion_estandar": data.desviacion_estandar,
+        "total_experimentos": data.num_experimentos
     }
