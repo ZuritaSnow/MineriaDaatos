@@ -214,7 +214,7 @@ menu.addEventListener("change", () => {
             // Crear el botón dinámicamente
             botones.innerHTML = ""; // Limpiar botones previos
             boton.className = "btn";
-            boton.id = "button_bino";
+            boton.id = "button_exp";
             boton.textContent = "Simular";
             botones.appendChild(boton);
 
@@ -295,7 +295,83 @@ menu.addEventListener("change", () => {
             // Poner título e inputs en el DOM
             tituloDinamico.innerHTML = html_titulo;
             inputs.innerHTML = html_inputs;
+
+            // Crear el botón dinámicamente
+            botones.innerHTML = ""; // Limpiar botones previos
+            boton.className = "btn";
+            boton.id = "button_normal";
+            boton.textContent = "Simular";
+            botones.appendChild(boton);
+
             grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
+            
+            boton.addEventListener("click", async () => {
+                const numExp = parseInt(document.getElementById("num_experimentos").value);
+                const media_media = parseFloat(document.getElementById("media").value);
+                const desviacion_des = parseFloat(document.getElementById("desviacion").value);
+
+                // Llamar a tu API en FastAPI
+                const response = await fetch("/normal", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        num_experimentos: numExp,
+                        media: media_media,
+                        desviacion_estandar: desviacion_des
+                    })
+                });
+
+                const result = await response.json();
+
+                //limpiar el área de la gráfica antes de dibujar
+                grafica.innerHTML = "";
+
+                // Calcular estadísticas de los valores simulados
+                const valores = result.valores;
+                const n = valores.length;
+                const sum = valores.reduce((a,b) => a+b, 0);
+                const mean = sum / n;
+                const variance = valores.reduce((a,b) => a + (b-mean)**2, 0) / n;
+                const std = Math.sqrt(variance);
+                const min = Math.min(...valores);
+                const max = Math.max(...valores);
+
+                // Mostrar resumen
+                resultados.innerHTML = `
+                    <strong>Parámetros ingresados:</strong> <br>
+                    Media: ${result.media} <br>
+                    Desviación estándar: ${result.desviacion_estandar} <br>
+                    Total experimentos: ${result.total_experimentos} <br><br>
+
+                    <strong>Estadísticas de la simulación:</strong> <br>
+                    Media simulada: ${mean.toFixed(2)} <br>
+                    Desviación estándar simulada: ${std.toFixed(2)} <br>
+                    Mínimo: ${min.toFixed(2)} <br>
+                    Máximo: ${max.toFixed(2)}
+                `;
+
+                // Crear el histograma con los datos recibidos
+                // Graficar histograma
+                const hist = {
+                    x: result.valores,
+                    type: "histogram",
+                    nbinsx: 30,
+                    name: "Simulación",
+                    opacity: 0.7,
+                    marker: { color: "#3498db" }
+                };
+
+                const layout = {
+                    title: "Distribución Normal Simulada",
+                    xaxis: { title: "Valores" },
+                    yaxis: { title: "Frecuencia" },
+                    bargap: 0.2
+                };
+
+                Plotly.newPlot("chart", [hist], layout);
+            }
+            );
+            
             break;
 
         case "gibbs":
