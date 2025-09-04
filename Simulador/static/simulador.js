@@ -2,6 +2,7 @@ const menu = document.getElementById("menu");
 const inputs = document.getElementById("inputs");
 const grafica = document.getElementById("chart");
 const titulo = document.getElementById("tituloDinamico");
+const botones = document.getElementById("botones");
 
 menu.addEventListener("change", () => {
     let opcion = menu.value;
@@ -10,6 +11,7 @@ menu.addEventListener("change", () => {
 
     switch(opcion){
         case "bernu":
+            // HTML para título e inputs
             html_titulo = `<h1>Distribución de Bernoulli</h1>`;
             html_inputs = `
                 <div class="input">
@@ -21,11 +23,62 @@ menu.addEventListener("change", () => {
                     <input type="text" id="prob_exito">
                 </div>
             `;
-    
+
+            // Poner título e inputs en el DOM
+            tituloDinamico.innerHTML = html_titulo;
+            inputs.innerHTML = html_inputs;
+
+            // Crear el botón dinámicamente
+            botones.innerHTML = ""; // Limpiar botones previos
+            const boton = document.createElement("button");
+            boton.id = "button_bernu";
+            boton.textContent = "Simular";
+            botones.appendChild(boton);
+
+            // Limpiar el área de la gráfica
             grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
-            // Crear el histograma usando la función
-            crearHistograma(datosHistograma);
-            break
+
+            // Asignar evento al botón recién creado
+            boton.addEventListener("click", async () => {
+                const numExp = parseInt(document.getElementById("num_experimentos").value);
+                const probExito = parseFloat(document.getElementById("prob_exito").value);
+
+                // Llamar a tu API en FastAPI
+                const response = await fetch("/binomial_puntual", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        num_experimentos: numExp,
+                        probabilidad_exito: probExito
+                    })
+                });
+
+                const result = await response.json();
+
+                //limpiar el área de la gráfica antes de dibujar
+                grafica.innerHTML = "";
+
+                // Crear el histograma con los datos recibidos
+                // Preparar datos para Plotly
+                const x = result.datos.map(d => d.rango);    // ["Éxito", "Fracaso"]
+                const y = result.datos.map(d => d.freq);     // [10, 90]
+
+                const trace = {
+                    x: x,
+                    y: y,
+                    type: 'bar',
+                    marker: { color: ['#74b9ff', '#ff7675'] }
+                };
+
+                const layout = {
+                    title: { text: 'Distribución Bernoulli', font: { size: 24 } },
+                    xaxis: { title: 'Resultado' },
+                    yaxis: { title: 'Frecuencia' },
+                };
+
+                Plotly.newPlot('chart', [trace], layout, {responsive: true});
+            });
+            break;
 
         case "bino":
             html_titulo = `<h1>Distribución Binomial</h1>`;
@@ -43,6 +96,9 @@ menu.addEventListener("change", () => {
                     <input type="text" id="prob_exito">
                 </div>
             `;
+            // Poner título e inputs en el DOM
+            tituloDinamico.innerHTML = html_titulo;
+            inputs.innerHTML = html_inputs;
             grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             break;
         
@@ -62,6 +118,9 @@ menu.addEventListener("change", () => {
                     <input type="text" id="probs">
                 </div>
             `;
+            // Poner título e inputs en el DOM
+            tituloDinamico.innerHTML = html_titulo;
+            inputs.innerHTML = html_inputs;
             grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             break;
         
@@ -77,6 +136,9 @@ menu.addEventListener("change", () => {
                     <input type="text" id="lambda">
                 </div>
             `;
+            // Poner título e inputs en el DOM
+            tituloDinamico.innerHTML = html_titulo;
+            inputs.innerHTML = html_inputs;
             grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             break;
         
@@ -96,6 +158,9 @@ menu.addEventListener("change", () => {
                     <input type="text" id="desviacion">
                 </div>
             `;
+            // Poner título e inputs en el DOM
+            tituloDinamico.innerHTML = html_titulo;
+            inputs.innerHTML = html_inputs;
             grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             break;
 
@@ -115,12 +180,14 @@ menu.addEventListener("change", () => {
                     <input type="text" id="Y0">
                 </div>
             `;
+            // Poner título e inputs en el DOM
+            tituloDinamico.innerHTML = html_titulo;
+            inputs.innerHTML = html_inputs;
             grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             break;
     }
-    titulo.innerHTML = html_titulo;
-    inputs.innerHTML = html_inputs;
 });
+
 
 // Función para crear histograma
 function crearHistograma(
@@ -155,4 +222,9 @@ const datosHistograma = [
     { rango: "50-60", freq: 7 },
     { rango: "60-70", freq: 3 }
 ];
+
+window.addEventListener('resize', () => {
+    Plotly.Plots.resize('chart');
+});
+
 
