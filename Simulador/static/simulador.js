@@ -32,6 +32,7 @@ menu.addEventListener("change", () => {
             // Crear el botón dinámicamente
             botones.innerHTML = ""; // Limpiar botones previos
             const boton = document.createElement("button");
+            boton.className = "btn";
             boton.id = "button_bernu";
             boton.textContent = "Simular";
             botones.appendChild(boton);
@@ -207,7 +208,7 @@ function mostrarResultados(datos, exitos, fracasos, limiteIndividual = 100) {
         const lista = document.createElement("ul");
         datos.forEach((res, index) => {
             const li = document.createElement("li");
-            li.textContent = `Experimento ${index + 1}: ${res === 1 ? "Éxito" : "Fracaso"}`;
+            li.textContent = `Exp ${index + 1}: ${res === 1 ? "Éxito" : "Fracaso"}`;
             lista.appendChild(li);
         });
         resultados.appendChild(lista);
