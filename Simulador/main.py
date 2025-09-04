@@ -37,14 +37,17 @@ async def binomial_puntual(data: BernoulliInput):
         resultado = random()
         if resultado < data.probabilidad_exito:
             exito += 1
-            resultados.append("Exito")
+            resultados.append(1)
         else:
             fracaso += 1
-            resultados.append("Fracaso")
+            resultados.append(0)
     return {
         "datos": [
             {"rango": "Éxito", "freq": exito},
             {"rango": "Fracaso", "freq": fracaso}
         ],
+        "resultados_individuales": resultados,  # Para mostrar en texto
         "total_experimentos": data.num_experimentos,
+        "exitos": exito,
+        "fracasos": fracaso
     }

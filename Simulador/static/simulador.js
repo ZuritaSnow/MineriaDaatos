@@ -3,6 +3,7 @@ const inputs = document.getElementById("inputs");
 const grafica = document.getElementById("chart");
 const titulo = document.getElementById("tituloDinamico");
 const botones = document.getElementById("botones");
+const resultados = document.getElementById("resultados-text");
 
 menu.addEventListener("change", () => {
     let opcion = menu.value;
@@ -55,6 +56,8 @@ menu.addEventListener("change", () => {
 
                 const result = await response.json();
 
+                mostrarResultados(result.resultados_individuales, result.exitos, result.fracasos);
+
                 //limpiar el área de la gráfica antes de dibujar
                 grafica.innerHTML = "";
 
@@ -78,6 +81,7 @@ menu.addEventListener("change", () => {
 
                 Plotly.newPlot('chart', [trace], layout, {responsive: true});
             });
+
             break;
 
         case "bino":
@@ -188,43 +192,34 @@ menu.addEventListener("change", () => {
     }
 });
 
-
-// Función para crear histograma
-function crearHistograma(
-  datos,
-  colores = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8']
-) {
-  // Limpiar el contenedor antes de dibujar
-  grafica.innerHTML = "";
-  grafica.innerHTML = "<h2>Ejemplo de Histograma</h2>";
-
-  new Morris.Bar({
-    element: grafica,
-    data: datos,
-    xkey: 'rango',
-    ykeys: ['freq'],
-    labels: ['Frecuencia'],
-    barColors: colores,
-    gridTextSize: 14,
-    resize: true,
-    hideHover: 'auto'
-  });
-}
-
-
-// Datos de ejemplo
-const datosHistograma = [
-    { rango: "0-10", freq: 5 },
-    { rango: "10-20", freq: 8 },
-    { rango: "20-30", freq: 12 },
-    { rango: "30-40", freq: 20 },
-    { rango: "40-50", freq: 10 },
-    { rango: "50-60", freq: 7 },
-    { rango: "60-70", freq: 3 }
-];
-
+// Hacer la gráfica responsiva
 window.addEventListener('resize', () => {
     Plotly.Plots.resize('chart');
 });
+
+// Mostrar resultados
+function mostrarResultados(datos, exitos, fracasos, limiteIndividual = 100) {
+    resultados.innerHTML = ""; // limpiar contenedor
+    const numExp = datos.length;
+
+    if (numExp <= limiteIndividual) {
+        // Mostrar resultados individuales
+        const lista = document.createElement("ul");
+        datos.forEach((res, index) => {
+            const li = document.createElement("li");
+            li.textContent = `Experimento ${index + 1}: ${res === 1 ? "Éxito" : "Fracaso"}`;
+            lista.appendChild(li);
+        });
+        resultados.appendChild(lista);
+        resultados.innerHTML += `<p>Éxitos: ${exitos}</p><p>Fracasos: ${fracasos}</p>`;
+    } else {
+        // Mostrar resumen
+        resultados.innerHTML = `
+            <p>Número de experimentos: ${numExp}</p>
+            <p>Éxitos: ${exitos}</p>
+            <p>Fracasos: ${fracasos}</p>
+        `;
+    }
+}
 
 
