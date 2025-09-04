@@ -3,7 +3,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from random import random
-import os
+from collections import Counter
+
 
 simulador = FastAPI()
 
@@ -50,4 +51,41 @@ async def binomial_puntual(data: BernoulliInput):
         "total_experimentos": data.num_experimentos,
         "exitos": exito,
         "fracasos": fracaso
+    }
+
+'''
+Endpoint para el simulador de Binomial (Bernoulli)
+'''
+class BinomialInput(BaseModel):
+    num_experimentos: int
+    probabilidad_exito: float
+    num_pruebas: int
+
+@simulador.post("/binomial")
+async def binomial(data: BinomialInput):
+    resultados = []  # éxitos obtenidos en cada experimento
+
+    for _ in range(data.num_experimentos):
+        exitos_en_prueba = 0
+        for _ in range(data.num_pruebas):
+            if random() < data.probabilidad_exito:
+                exitos_en_prueba += 1
+        resultados.append(exitos_en_prueba)
+
+    # Conteo de frecuencia de número de éxitos
+    conteo_frecuencia = Counter(resultados)
+    datos_respuesta = {
+        "x": list(conteo_frecuencia.keys()),   # valores de éxitos
+        "y": list(conteo_frecuencia.values()) # frecuencias
+    }
+
+    total_exitos = sum(resultados)
+    total_fracasos = data.num_experimentos * data.num_pruebas - total_exitos
+
+    return {
+        "datos": datos_respuesta,
+        "resultados_individuales": resultados,
+        "total_experimentos": data.num_experimentos,
+        "total_exitos": total_exitos,
+        "total_fracasos": total_fracasos
     }

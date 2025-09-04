@@ -4,6 +4,7 @@ const grafica = document.getElementById("chart");
 const titulo = document.getElementById("tituloDinamico");
 const botones = document.getElementById("botones");
 const resultados = document.getElementById("resultados-text");
+const boton = document.createElement("button");
 
 menu.addEventListener("change", () => {
     let opcion = menu.value;
@@ -12,6 +13,7 @@ menu.addEventListener("change", () => {
 
     switch(opcion){
         case "bernu":
+            resultados.innerHTML = ""; // Limpiar resultados previos
             // HTML para título e inputs
             html_titulo = `<h1>Distribución de Bernoulli</h1>`;
             html_inputs = `
@@ -31,7 +33,6 @@ menu.addEventListener("change", () => {
 
             // Crear el botón dinámicamente
             botones.innerHTML = ""; // Limpiar botones previos
-            const boton = document.createElement("button");
             boton.className = "btn";
             boton.id = "button_bernu";
             boton.textContent = "Simular";
@@ -71,7 +72,7 @@ menu.addEventListener("change", () => {
                     x: x,
                     y: y,
                     type: 'bar',
-                    marker: { color: ['#74b9ff', '#ff7675'] }
+                    marker: { color: '#6c5ce7' }
                 };
 
                 const layout = {
@@ -86,6 +87,7 @@ menu.addEventListener("change", () => {
             break;
 
         case "bino":
+            resultados.innerHTML = ""; // Limpiar resultados previos
             html_titulo = `<h1>Distribución Binomial</h1>`;
             html_inputs = `
                 <div class="input">
@@ -93,7 +95,7 @@ menu.addEventListener("change", () => {
                     <input type="text" id="num_experimentos">
                 </div>
                 <div class="input">
-                    <label>Número de repeticiones en cada experimento</label>
+                    <label>Número de pruebas en cada experimento</label>
                     <input type="text" id="num_reps">
                 </div>
                 <div class="input">
@@ -104,10 +106,73 @@ menu.addEventListener("change", () => {
             // Poner título e inputs en el DOM
             tituloDinamico.innerHTML = html_titulo;
             inputs.innerHTML = html_inputs;
+
+            // Crear el botón dinámicamente
+            botones.innerHTML = ""; // Limpiar botones previos
+            boton.className = "btn";
+            boton.id = "button_bino";
+            boton.textContent = "Simular";
+            botones.appendChild(boton);
+
             grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
+            
+            boton.addEventListener("click", async () => {
+                const numExp = parseInt(document.getElementById("num_experimentos").value);
+                const probExito = parseFloat(document.getElementById("prob_exito").value);
+                const numReps = parseInt(document.getElementById("num_reps").value);
+
+                // Llamar a tu API en FastAPI
+                const response = await fetch("/binomial", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        num_experimentos: numExp,
+                        probabilidad_exito: probExito,
+                        num_pruebas: numReps
+                    })
+                });
+
+                const result = await response.json();
+
+                //limpiar el área de la gráfica antes de dibujar
+                grafica.innerHTML = "";
+
+                // Crear el histograma con los datos recibidos
+                // 1. Graficar con Plotly
+                const trace = {
+                    x: result.datos.x,
+                    y: result.datos.y,
+                    type: "bar",
+                    marker: { color: "#6c5ce7" }
+                };
+
+                const layout = {
+                    title: { text: 'Distribución Binomial', font: { size: 24 } },
+                    xaxis: { title: "Número de éxitos", font: { size: 10} },
+                    yaxis: { title: "Frecuencia" },
+                    bargap: 0.2
+                };
+
+                Plotly.newPlot("chart", [trace], layout, {responsive: true});
+
+                // 2. Mostrar resultados como texto
+                let html = `
+                    <p><strong>Total de experimentos:</strong> ${result.total_experimentos}</p>
+                    <p><strong>Total de éxitos:</strong> ${result.total_exitos}</p>
+                    <p><strong>Total de fracasos:</strong> ${result.total_fracasos}</p>
+                `;
+
+                if (result.total_experimentos <= 100) {
+                    html += `<p><strong>Resultados individuales:</strong> ${result.resultados_individuales.join(", ")}</p>`;
+                }
+
+                resultados.innerHTML = html;
+            }
+            );
             break;
         
         case "mult":
+            resultados.innerHTML = ""; // Limpiar resultados previos
             html_titulo = `<h1>Distribución Multinomial</h1>`;
             html_inputs = `
                 <div class="input">
@@ -130,6 +195,7 @@ menu.addEventListener("change", () => {
             break;
         
         case "exp":
+            resultados.innerHTML = ""; // Limpiar resultados previos
             html_titulo = `<h1>Distribución Exponencial</h1>`;
             html_inputs = `
                 <div class="input">
@@ -148,6 +214,7 @@ menu.addEventListener("change", () => {
             break;
         
         case "norm":
+            resultados.innerHTML = ""; // Limpiar resultados previos
             html_titulo = `<h1>Distribución Normal</h1>`;
             html_inputs = `
                 <div class="input">
@@ -170,6 +237,7 @@ menu.addEventListener("change", () => {
             break;
 
         case "gibbs":
+            resultados.innerHTML = ""; // Limpiar resultados previos
             html_titulo = `<h1>Método de Gebbs</h1>`;
             html_inputs = `
                 <div class="input">
