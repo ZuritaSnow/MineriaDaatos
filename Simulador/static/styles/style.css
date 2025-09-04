@@ -39,7 +39,7 @@ h1 {
   border-radius: 8px;
   padding: 1px;
   min-width: 180px;
-  margin: 0 100px, 0, 0;
+  margin: 0 100px 0 0;
 }
 .opciones label {
   font-size: 0.9rem;
@@ -60,9 +60,10 @@ h1 {
 
 .Contenido {
   display: flex;
-  justify-content: space-between;
+  justify-content: start;
   padding: 24px;
   gap: 24px;
+  background: #ffffff;
 }
 
 #chart {
@@ -70,47 +71,60 @@ h1 {
   height: 300px;
   border: 1px solid #ddd;
   border-radius: 8px;
+  padding: 16px;
   background: #f9f9f9;
 }
 
+
 /* Barra lateral izquierda de informacion */
 /* Barra lateral de resultados */
+
+.informacion{
+  width: 20%;
+  background: #ffffff;
+}
+.descargar-csv {
+  background: linear-gradient(90deg, #6c47c7 0%, #b39ddb 100%);
+  color: #fff;
+  border: none; /* Elimina el borde grueso */
+  border-radius: 24px;
+  padding: 10px 32px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer; /* Cambia a pointer para indicar clic */
+  box-shadow: 0 4px 12px rgba(44, 62, 80, 0.12);
+  transition: background 0.2s, transform 0.2s;
+  outline: none;
+  margin-left: 12px;
+}
+
+.descargar-csv:hover {
+  background: linear-gradient(90deg, #b39ddb 0%, #6c47c7 100%);
+  transform: scale(1.05); /* Efecto de agrandar al pasar el mouse */
+}
+
+
 .resultados {
   background: #f8f9fa;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
   padding: 24px;
   margin: 24px 0;
-  width: 100%;
-  max-width: 600px;
+  width: 200px;
+  max-width: 200px;
+  height: 90%;
 }
-
+.resultados-header span {
+font-size: 1.2rem;
+font-weight: bold;
+color: #444;
+}
 .resultados-header {
-  display: flex;
-  justify-content: space-between;
+  justify-content: start;
   align-items: center;
   margin-bottom: 16px;
 }
 
-.resultados-header span {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #444;
-}
 
-.descargar-csv {
-  background: #333;
-  color: #fff;
-  border: none;
-  border-radius: 24px;
-  padding: 8px 24px;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(44, 62, 80, 0.08);
-  transition: background 0.2s;
-}
 
-.descargar-csv:hover {
-  background: #555;
-}
