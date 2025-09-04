@@ -21,9 +21,11 @@ menu.addEventListener("change", () => {
                     <input type="text" id="prob_exito">
                 </div>
             `;
+    
+            grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             // Crear el histograma usando la función
-            crearHistograma('myHistogram', datosHistograma);
-            break;
+            crearHistograma(datosHistograma);
+            break
 
         case "bino":
             html_titulo = `<h1>Distribución Binomial</h1>`;
@@ -41,6 +43,7 @@ menu.addEventListener("change", () => {
                     <input type="text" id="prob_exito">
                 </div>
             `;
+            grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             break;
         
         case "mult":
@@ -59,6 +62,7 @@ menu.addEventListener("change", () => {
                     <input type="text" id="probs">
                 </div>
             `;
+            grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             break;
         
         case "exp":
@@ -73,6 +77,7 @@ menu.addEventListener("change", () => {
                     <input type="text" id="lambda">
                 </div>
             `;
+            grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             break;
         
         case "norm":
@@ -91,6 +96,7 @@ menu.addEventListener("change", () => {
                     <input type="text" id="desviacion">
                 </div>
             `;
+            grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             break;
 
         case "gibbs":
@@ -109,6 +115,7 @@ menu.addEventListener("change", () => {
                     <input type="text" id="Y0">
                 </div>
             `;
+            grafica.innerHTML = "<p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>";
             break;
     }
     titulo.innerHTML = html_titulo;
@@ -116,9 +123,15 @@ menu.addEventListener("change", () => {
 });
 
 // Función para crear histograma
-function crearHistograma(idContenedor, datos, colores = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8']) {
-    new Morris.Bar({
-    element: idContenedor,
+function crearHistograma(
+  datos,
+  colores = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8']
+) {
+  // Limpiar el contenedor antes de dibujar
+  grafica.innerHTML = "";
+
+  new Morris.Bar({
+    element: grafica,
     data: datos,
     xkey: 'rango',
     ykeys: ['freq'],
@@ -127,8 +140,9 @@ function crearHistograma(idContenedor, datos, colores = ['#ff7675', '#74b9ff', '
     gridTextSize: 14,
     resize: true,
     hideHover: 'auto'
-    });
+  });
 }
+
 
 // Datos de ejemplo
 const datosHistograma = [

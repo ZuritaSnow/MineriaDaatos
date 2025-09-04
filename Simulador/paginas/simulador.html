@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulador de Densidades</title>
   <link rel="stylesheet" href="../styles/style.css">
+  <!-- Estilos de Morris -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
 </head>
 
 <body>
@@ -16,7 +18,8 @@
     <div class = "opciones">
       <label for = "menu"> Menu </label>
       <select id = "menu">
-        <option value = "bernu">Bernulli</option>
+        <option value="" selected disabled hidden>Seleccione una opción</option>
+        <option value = "bernu">Bernoulli</option>
         <option value = "bino">Binomial</option>
         <option value = "mult">Multinomial</option>
         <option value = "exp">Exponencial</option>
@@ -42,7 +45,7 @@
         </div>
         <div id="grafica"> 
             <div id="tituloDinamico">
-                <h1> Aquí hay un título </h1> 
+                <h1> ¡Bienvenido a nuestro simulador! Elige una opción para comenzar </h1>
             </div> 
             <div id="inputs">
                 <p> Aquí apareceran las entradas </p>
@@ -55,9 +58,12 @@
       </div> 
     </main>
   
-  
+  <!-- Librerías necesarias -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 
-  <!-- Script opcional -->
+  <!-- Script -->
   <script src="../scripts/simulador.js"></script>
 </body>
 </html>
