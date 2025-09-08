@@ -72,7 +72,8 @@ menu.addEventListener("change", () => {
                     x: x,
                     y: y,
                     type: 'bar',
-                    marker: { color: '#6c5ce7' }
+    
+                    marker: { color: ['#6c5ce7', '#e21c1cff'] }
                 };
 
                 const layout = {
@@ -247,9 +248,30 @@ menu.addEventListener("change", () => {
                 const hist = {
                     x: valores,
                     type: "histogram",
+                    histnorm: "probability density", // <- normalización
                     name: "Frecuencia simulada",
                     opacity: 0.6,
                     marker: {color: "#3498db"}
+                };
+
+                // --- Curva teórica ---
+                const maxX = Math.max(...valores);
+                const xs = [];
+                const ys = [];
+                const pasos = 100;
+                for (let i = 0; i <= pasos; i++) {
+                    const x = (i / pasos) * maxX;
+                    xs.push(x);
+                    ys.push(tasa * Math.exp(-tasa * x));
+                }
+
+                const curva = {
+                    x: xs,
+                    y: ys,
+                    type: "scatter",
+                    mode: "lines",
+                    line: {color: "red", width: 2},
+                    name: "Exponencial teórica"
                 };
 
 
@@ -260,7 +282,14 @@ menu.addEventListener("change", () => {
                     barmode: "overlay"
                 };
 
-                Plotly.newPlot("chart", [hist], layout, {responsive: true});
+                // --- Mostrar ---
+                Plotly.newPlot("chart", [hist, curva], {
+                    title: "Distribución Exponencial",
+                    xaxis: {title: "x"},
+                    yaxis: {title: "Densidad de probabilidad"},
+                    barmode: "overlay",
+                    bargap: 0.4
+                    },{responsive: true});
 
 
                 // 2. Mostrar resultados como texto
