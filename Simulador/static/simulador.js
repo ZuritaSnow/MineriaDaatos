@@ -77,9 +77,16 @@ menu.addEventListener("change", () => {
                 };
 
                 const layout = {
-                    title: { text: 'Distribución Bernoulli', font: { size: 24 } },
-                    xaxis: { title: 'Resultado' },
-                    yaxis: { title: 'Frecuencia' },
+                    title: {
+                        text: `Distribución Bernoulli (p=${probExito}, n=${numExp})`,
+                        font: { size: 24 }
+                    },
+                    xaxis: {
+                        title: { text: "Resultados posibles", font: { size: 16, color: "black" } }
+                    },
+                    yaxis: {
+                        title: { text: "Frecuencia relativa", font: { size: 16, color: "black" } }
+                    },
                 };
 
                 Plotly.newPlot('chart', [trace], layout, {responsive: true});
@@ -148,9 +155,16 @@ menu.addEventListener("change", () => {
                 };
 
                 const layout = {
-                    title: { text: 'Distribución Binomial', font: { size: 24 } },
-                    xaxis: { title: "Número de éxitos", font: { size: 10} },
-                    yaxis: { title: "Frecuencia" },
+                    title: {
+                        text: `Distribución Binomial (p=${probExito}, n=${numExp})`,
+                        font: { size: 24 }
+                    },
+                    xaxis: {
+                        title: { text: "Número de éxitos", font: { size: 16, color: "black" } }
+                    },
+                    yaxis: {
+                        title: { text: "Frecuencia relativa", font: { size: 16, color: "black" } }
+                    },
                     bargap: 0.2
                 };
 
@@ -250,8 +264,9 @@ menu.addEventListener("change", () => {
                     type: "histogram",
                     histnorm: "probability density", // <- normalización
                     name: "Frecuencia simulada",
-                    opacity: 0.6,
-                    marker: {color: "#3498db"}
+                    opacity: 0.2,
+                    marker: {color: "#3498db"},
+                    nbinsx: 100
                 };
 
                 // --- Curva teórica ---
@@ -275,19 +290,18 @@ menu.addEventListener("change", () => {
                 };
 
 
-                const layout = {
-                    title: {text: "Distribución Exponencial (Simulada vs Teórica)"},
-                    xaxis: {title: "x"},
-                    yaxis: {title: "Frecuencia"},
-                    barmode: "overlay"
-                };
-
                 // --- Mostrar ---
                 Plotly.newPlot("chart", [hist, curva], {
-                    title: "Distribución Exponencial",
-                    xaxis: {title: "x"},
-                    yaxis: {title: "Densidad de probabilidad"},
-                    barmode: "overlay",
+                    title: {
+                        text: `Distribución Exponencial (λ=${tasa}, n=${valores.length})`,
+                        font: { size: 24 }
+                    },
+                    xaxis: {
+                        title: { text: "Tiempo entre eventos", font: { size: 16, color: "black" } }
+                    },
+                    yaxis: {
+                        title: { text: "Densidad de probabilidad", font: { size: 16, color: "black" } }
+                    },
                     bargap: 0.4
                     },{responsive: true});
 
@@ -384,22 +398,52 @@ menu.addEventListener("change", () => {
                 const hist = {
                     x: result.valores,
                     type: "histogram",
-                    nbinsx: 30,
+                    histnorm: "probability density", // área = 1
                     name: "Simulación",
                     opacity: 0.7,
-                    marker: { color: "#3498db" }
+                    marker: { color: "#3498db" },
+                    nbinsx: 100
                 };
 
-                const layout = {
-                    title: "Distribución Normal Simulada",
-                    xaxis: { title: "Valores" },
-                    yaxis: { title: "Frecuencia" },
+                // --- Curva normal teórica ---
+                const minX = Math.min(...valores);
+                const maxX = Math.max(...valores);
+                const xs = [];
+                const ys = [];
+                const pasos = 200;
+                for (let i = 0; i <= pasos; i++) {
+                    const x = minX + (i / pasos) * (maxX - minX);
+                    xs.push(x);
+                    const y = (1 / (result.desviacion_estandar * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - result.media) / result.desviacion_estandar, 2));
+                    ys.push(y);
+                }
+
+                const curva = {
+                    x: xs,
+                    y: ys,
+                    type: "scatter",
+                    mode: "lines",
+                    line: {color: "red", width: 2},
+                    name: "Normal teórica"
+                };
+
+                // --- Mostrar ---
+                Plotly.newPlot("chart", [hist, curva], {
+                    title: { 
+                        text: `Distribución Normal (μ=${result.media}, σ=${result.desviacion_estandar}, n=${n})`, 
+                        font: { size: 24 } 
+                    },
+                    xaxis: {
+                        title: { text: "Valores", font: { size: 16, color: "black" } }
+                    },
+                    yaxis: {
+                        title: { text: "Densidad de probabilidad", font: { size: 16, color: "black" } }
+                    },
                     bargap: 0.2
-                };
-
-                Plotly.newPlot("chart", [hist], layout);
-            }
-            );
+                }, {
+                    responsive: true
+                });
+            });
             
             break;
 
