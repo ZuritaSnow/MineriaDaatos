@@ -12,54 +12,173 @@
 <body>
 
   <!-- Encabezado con menu despegable -->
-  <div class = "encabezado">
+  <div class = "encabezado text-center">
     <img src="/static/recursos/lapiz.png" alt = "Logo" class ="logo">
-    <h1>Simulador de Densidades</h1>
-    <div class = "opciones">
-      <label for = "menu"> Menu </label>
-      <select id = "menu">
-        <option value="" selected disabled hidden>Seleccione una opción</option>
-        <option value = "bernu">Bernoulli</option>
-        <option value = "bino">Binomial</option>
-        <option value = "mult">Multinomial</option>
-        <option value = "exp">Exponencial</option>
-        <option value = "norm">Normal</option>
-        <option value = "gibbs">Método de Gebbs</option>
-      </select>
-      <br><br>
-    </div>
+    <h1 style="text-align: center;">Simulador de Densidades</h1>
+      
   </div>
-  
-  <!-- Área principal -->
-  
-  <main class="main">
-      <div class="Contenido">
-        <div class="informacion"> 
-          <div class="resultados">
-            <div class="resultados-header">
-              <div id = "resultados-header">
-              <p>Resultados de la Simulación</p>
-              <button class ="btn">Descargar CSV</button>
-              </div>
+
+  <div class="container">
+    <!-- Navegación lateral -->
+    <nav class="sidebar">
+      <div class="sidebar-title">Distribuciones</div>
+      <button class="nav-item active" data-distribution="bernoulli">Bernoulli</button>
+      <button class="nav-item" data-distribution="binomial">Binomial</button>
+      <button class="nav-item" data-distribution="multinomial">Multinomial</button>
+      <button class="nav-item" data-distribution="exponencial">Exponencial</button>
+      <button class="nav-item" data-distribution="normal">Normal</button>
+      <button class="nav-item" data-distribution="gibbs">Método de Gibbs</button>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+      <!-- Panel de resultados -->
+      <div class="results-panel">
+        <div class="results-header">
+          <h3>Resultados</h3>
+          <button class="btn">Descargar CSV</button>
+        </div>
+        <div class="results-content">
+          <p>¡Aquí podrás observar los resultados de la simulación!</p>
+        </div>
+      </div>
+
+      <!-- Panel de simulación -->
+      <div class="simulation-panel">
+        <h2 class="panel-title" id="panelTitle">Distribución de Bernoulli</h2>
+
+        <!-- Contenido  Bernu -->
+        <div class="distribution-content active" id="bernoulli">
+          <div class="inputs-section">
+            <div class="input-group">
+              <label for="bernoulli-p">Probabilidad de éxito (p):</label>
+              <input type="number" id="bernoulli-p" min="0" max="1" step="0.01" value="0.5">
             </div>
-            <div id="resultados-text">
-                <p> ¡Aquí podrás observar los resultados!</p> 
-            </div> 
+            <div class="input-group">
+              <label for="bernoulli-n">Número de simulaciones:</label>
+              <input type="number" id="bernoulli-n" min="1" value="1000">
+            </div>
+          </div>
+          <div class="buttons-section">
+            <button class="btn-primary">Simular</button>
+            <button class="btn-primary">Limpiar</button>
           </div>
         </div>
-        <div id="grafica"> 
-            <div id="tituloDinamico">
-                <h1> ¡Bienvenido a nuestro simulador! Elige una opción para comenzar </h1>
-            </div> 
-            <div id="inputs">
+
+        <!-- Contenido para Binomial -->
+        <div class="distribution-content" id="binomial">
+          <div class="inputs-section">
+            <div class="input-group">
+              <label for="binomial-n">Número de ensayos (n):</label>
+              <input type="number" id="binomial-n" min="1" value="10">
             </div>
-            <div id="botones"></div>
-            <div id="chart">
-              <p>Selecciona una distribución y llena los parámetros para generar la gráfica 📊</p>
+            <div class="input-group">
+              <label for="binomial-p">Probabilidad de éxito (p):</label>
+              <input type="number" id="binomial-p" min="0" max="1" step="0.01" value="0.5">
             </div>
-        </div>   
-      </div> 
-    </main>
+            <div class="input-group">
+              <label for="binomial-sims">Número de simulaciones:</label>
+              <input type="number" id="binomial-sims" min="1" value="1000">
+            </div>
+          </div>
+          <div class="buttons-section">
+            <button class="btn-primary">Simular</button>
+            <button class="btn-primary">Limpiar</button>
+          </div>
+        </div>
+
+        <!-- Contenido para Multinomial -->
+        <div class="distribution-content" id="multinomial">
+          
+          
+          
+          <div class="inputs-section">
+            <div class="input-group">
+              <label for="multinomial-n">Número de ensayos (n):</label>
+              <input type="number" id="multinomial-n" min="1" value="10">
+            </div>
+            <div class="input-group">
+              <label for="multinomial-p">Probabilidades (separadas por coma):</label>
+              <input type="text" id="multinomial-p" value="0.3,0.4,0.3">
+            </div>
+            <div class="input-group">
+              <label for="multinomial-sims">Número de simulaciones:</label>
+              <input type="number" id="multinomial-sims" min="1" value="1000">
+            </div>
+          </div>
+          <div class="buttons-section">
+            <button class="btn-primary">Simular</button>
+            <button class="btn-primary">Limpiar</button>
+          </div>
+        </div>
+
+        <!-- Contenido para Exponencial -->
+        <div class="distribution-content" id="exponencial">
+          <div class="inputs-section">
+            <div class="input-group">
+              <label for="exponencial-lambda">Parámetro λ (lambda):</label>
+              <input type="number" id="exponencial-lambda" min="0.01" step="0.01" value="1">
+            </div>
+            <div class="input-group">
+              <label for="exponencial-n">Número de simulaciones:</label>
+              <input type="number" id="exponencial-n" min="1" value="1000">
+            </div>
+          </div>
+          <div class="buttons-section">
+            <button class="btn-primary">Simular</button>
+            <button class="btn-primary">Limpiar</button>
+          </div>
+        </div>
+
+        <!-- Contenido para Normal -->
+        <div class="distribution-content" id="normal">
+          <div class="inputs-section">
+            <div class="input-group">
+              <label for="normal-mu">Media (μ):</label>
+              <input type="number" id="normal-mu" step="0.01" value="0">
+            </div>
+            <div class="input-group">
+              <label for="normal-sigma">Desviación estándar (σ):</label>
+              <input type="number" id="normal-sigma" min="0.01" step="0.01" value="1">
+            </div>
+            <div class="input-group">
+              <label for="normal-n">Número de simulaciones:</label>
+              <input type="number" id="normal-n" min="1" value="1000">
+            </div>
+          </div>
+          <div class="buttons-section">
+            <button class="btn-primary">Simular</button>
+            <button class="btn-primary">Limpiar</button>
+          </div>
+        </div>
+
+        <!-- Contenido para Método de Gibbs -->
+        <div class="distribution-content" id="gibbs">
+          <div class="inputs-section">
+            <div class="input-group">
+              <label for="gibbs-iterations">Número de iteraciones:</label>
+              <input type="number" id="gibbs-iterations" min="100" value="1000">
+            </div>
+            <div class="input-group">
+              <label for="gibbs-burnin">Período de calentamiento:</label>
+              <input type="number" id="gibbs-burnin" min="0" value="100">
+            </div>
+          </div>
+          <div class="buttons-section">
+            <button class="btn-primary">Simular</button>
+            <button class="btn-primary">Limpiar</button>
+          </div>
+        </div>
+
+        <!-- Sección de gráfica -->
+        <div class="chart-section" id="chart">
+          <div class="chart-placeholder">
+            📈 Selecciona una distribución y ajusta los parámetros para generar la gráfica
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   
   <!-- Librerías necesarias -->
   <script src="https://cdn.plot.ly/plotly-3.1.0.min.js"></script>

@@ -11,12 +11,12 @@ import numpy as np
 simulador = FastAPI()
 
 # Montar el directorio 'static' para servir archivos estáticos
-simulador.mount("/static", StaticFiles(directory="static"), name="static")
+simulador.mount("/static", StaticFiles(directory="Simulador/static"), name="static")
 
 # Serve la página principal
 @simulador.get("/", response_class=HTMLResponse)
 async def read_root():
-    with open("static/index.html", "r", encoding="utf-8") as f:
+    with open("Simulador/static/index.html", "r", encoding="utf-8") as f:
         return f.read()
 
     
