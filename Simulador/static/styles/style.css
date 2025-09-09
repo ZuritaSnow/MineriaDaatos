@@ -41,6 +41,9 @@
       font-weight: 600;
     }
 
+    
+
+
     /* Contenedor principal */
     .container {
       display: flex;
@@ -59,7 +62,7 @@
 
     .sidebar-title {
       padding: 0 2rem 1rem 2rem;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 600;
       color: #333;
       border-bottom: 2px solid #f0f0f0;
@@ -73,7 +76,7 @@
       background: none;
       border: none;
       text-align: left;
-      font-size: 1.5rem;
+      font-size: 1.1rem;
       color: #666;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -114,6 +117,52 @@
       gap: 2rem;
     }
 
+
+
+    /* TABS MULT */
+
+    .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: linear-gradient(135deg, #9ba9e6 0%, #6e5885 100%);;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);;
+            color: white;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #764ba2;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 25px;
+            border-radius: 0 8px 8px 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+
+
+
     /* Panel de resultados */
     .results-panel {
       width: 350px;
@@ -138,6 +187,24 @@
       color: #333;
       font-size: 1.1rem;
       font-weight: 600;
+    }
+
+    .btn-proba {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin: 0 0.5rem;
+    }
+
+    .btn-proba:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
     }
 
     .btn {
@@ -244,10 +311,11 @@
     .chart-section {
       background: #f8f9ff;
       border-radius: 10px;
-      padding: 2rem;
+      padding-right: 2rem;
       text-align: center;
-      min-height: 400px;
-      display: flex;
+      min-height: 500px;
+
+      display: block;
       align-items: center;
       justify-content: center;
     }
@@ -256,18 +324,22 @@
       color: #666;
       font-size: 1.1rem;
       display: flex;
-      align-items: center;
+      align-items: left;
       gap: 0.5rem;
     }
 
-    
+    /* Contenido específico de cada distribución */
     .distribution-content {
       display: none;
     }
 
     .distribution-content.active {
       display: block;
+      max-width: 100%;
+      padding-right: 0px;
     }
+
+
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -276,7 +348,7 @@
       }
 
       .sidebar {
-        width: 100%;
+        width: 80%;
         order: 2;
       }
 
@@ -289,3 +361,6 @@
         width: 100%;
       }
     }
+
+
+    
