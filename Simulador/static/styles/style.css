@@ -74,6 +74,8 @@ h1 {
   justify-content: start;
   gap: 24px;
   background: #ffffff;
+  padding-right: 100px;
+  padding-left: 100px;
 }
 
 #chart {
