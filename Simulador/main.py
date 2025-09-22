@@ -513,6 +513,137 @@ async def normal(data: NormalInput):
         "total_experimentos": data.num_experimentos
     }
 
+# Define la función objetivo. La hacemos global para que sea fácil de modificar.
+def target_function_lineal(x, y):
+    """
+    Función objetivo f(x, y) = (2x + 3y + 2) / 28.
+    Esta función debe ser no negativa en el dominio de muestreo.
+    """
+    # Añadimos una comprobación para asegurarnos de que el resultado no sea negativo.
+    # Si lo es, devolvemos 0, ya que no puede haber probabilidad negativa.
+    value = (2 * x + 3 * y + 2) / 28
+    return max(0, value)
+
+class GibbsSampler:
+    def __init__(self, target_func, x_bounds, y_bounds):
+        self.target_function = target_func
+        self.x_min, self.x_max = x_bounds
+        self.y_min, self.y_max = y_bounds
+
+    def _conditional_sampler(self, fixed_val, is_x_conditional, n_points=1000):
+        """Helper unificado para muestrear P(X|Y=y) o P(Y|X=x)."""
+        if is_x_conditional:
+            # Muestrear X dado Y=fixed_val
+            vals = np.linspace(self.x_min, self.x_max, n_points)
+            probs = np.array([self.target_function(x, fixed_val) for x in vals])
+        else:
+            # Muestrear Y dado X=fixed_val
+            vals = np.linspace(self.y_min, self.y_max, n_points)
+            probs = np.array([self.target_function(fixed_val, y) for y in vals])
+
+        # Normalización para crear una distribución de probabilidad
+        probs = np.maximum(probs, 1e-10)  # Evitar probabilidades cero o negativas
+        probs_sum = np.sum(probs)
+        if probs_sum == 0: # Si todas las probabilidades son cero, devuelve un valor aleatorio en el rango
+            return np.random.choice(vals)
+        probs /= probs_sum
+
+        # Muestrear un valor de la distribución discreta
+        return np.random.choice(vals, p=probs)
+
+    def sample(self, x_init, y_init, n_samples, burn_in=1000):
+        total_samples = n_samples + burn_in
+        x_samples = np.zeros(total_samples)
+        y_samples = np.zeros(total_samples)
+
+        x_samples[0], y_samples[0] = x_init, y_init
+
+        for i in range(1, total_samples):
+            # Muestra X dado Y
+            x_samples[i] = self._conditional_sampler(y_samples[i-1], is_x_conditional=True)
+            # Muestra Y dado X
+            y_samples[i] = self._conditional_sampler(x_samples[i], is_x_conditional=False)
+
+        # Descarta el burn-in y devuelve las muestras
+        return x_samples[burn_in:], y_samples[burn_in:]
+
+# --- Modelos de Datos (Pydantic) para la API ---
+
+class SamplingParams(BaseModel):
+    x_init: float = 1.0
+    y_init: float = 1.0
+    n_samples: int = 10000
+    burn_in: int = 2000
+    # Ajustamos los límites por defecto al dominio de interés para esta función
+    x_bounds: List[float] = [0.0, 3.0]
+    y_bounds: List[float] = [0.0, 2.0]
+
+class SamplingResult(BaseModel):
+    x_samples: List[float]
+    y_samples: List[float]
+    mean_x: float
+    std_x: float
+    mean_y: float
+    std_y: float
+    correlation: float
+
+class TargetFunctionGrid(BaseModel):
+    x_grid: List[float]
+    y_grid: List[float]
+    z_grid: List[List[float]]
+
+# --- Endpoints de la API ---
+
+@simulador.post("/sample", response_model=SamplingResult)
+def run_sampling(params: SamplingParams):
+    """
+    Ejecuta el muestreo de Gibbs y devuelve las muestras generadas.
+    """
+    sampler = GibbsSampler(
+        target_func=target_function_lineal,
+        x_bounds=tuple(params.x_bounds),
+        y_bounds=tuple(params.y_bounds)
+    )
+    
+    x_samples, y_samples = sampler.sample(
+        x_init=params.x_init,
+        y_init=params.y_init,
+        n_samples=params.n_samples,
+        burn_in=params.burn_in
+    )
+    
+    # Calcula estadísticas descriptivas
+    mean_x = np.mean(x_samples)
+    std_x = np.std(x_samples)
+    mean_y = np.mean(y_samples)
+    std_y = np.std(y_samples)
+    correlation = np.corrcoef(x_samples, y_samples)[0, 1] if len(x_samples) > 1 else 0.0
+    
+    return {
+        "x_samples": x_samples.tolist(), "y_samples": y_samples.tolist(),
+        "mean_x": np.mean(x_samples), "std_x": np.std(x_samples),
+        "mean_y": np.mean(y_samples), "std_y": np.std(y_samples),
+        "correlation": np.corrcoef(x_samples, y_samples)[0, 1]
+    }
+
+@simulador.post("/target-function-data")
+def get_target_function_data(params: SamplingParams):
+    """
+    Genera una malla de puntos para visualizar la función objetivo en 3D.
+    """
+    try:
+        x_plot = np.linspace(params.x_bounds[0], params.x_bounds[1], 50)
+        y_plot = np.linspace(params.y_bounds[0], params.y_bounds[1], 50)
+        
+        # Llama a la función de Python directamente
+        z_plot = [[target_function_lineal(x, y) for x in x_plot] for y in y_plot]
+            
+        return {
+            "x_grid": x_plot.tolist(), "y_grid": y_plot.tolist(), "z_grid": z_plot
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al generar la superficie: {e}")
+
 
 '''
 Endpoint para el simulador de Normal Bivariada

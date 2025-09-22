@@ -739,9 +739,116 @@
       
       if (simulateBtn && simulateBtn.textContent === 'Simular') {
         simulateBtn.addEventListener('click', async () => {
-          alert('Fpendiente de implementar');
+          const body = {
+              num_experimentos: parseInt(document.getElementById('gibbs-iterations').value),
+              num_burn_in: parseInt(document.getElementById('gibbs-burnin').value),
+              x0: parseFloat(document.getElementById('x0').value),
+              y0: parseFloat(document.getElementById('y0').value),
+              x_min: parseFloat(document.getElementById('limite_inf').value),
+              x_max: parseFloat(document.getElementById('limite_sup').value),
+              y_min: parseFloat(document.getElementById('limite_inf').value),
+              y_max: parseFloat(document.getElementById('limite_sup').value)
+          };
+          // Validaciones
+          for (const key in body) {
+              if (isNaN(body[key])) {
+                  alert('Por favor, completa todos los campos correctamente');
+                  return;
+              }
+              if ((key === 'num_experimentos' || key === 'num_burn_in') && body[key] <= 0) {
+                  alert('El número de experimentos y burn-in deben ser mayores que 0');
+                  return;
+              }
+              if ((key === 'x_max' || key === 'y_max') && body[key] <= body[key.replace('max', 'min')]) {
+                  alert('El límite superior debe ser mayor que el límite inferior');
+                  return;
+              }
+            }
+              
+              //mostrar loading
+              grafica.innerHTML = '<div class="chart-placeholder">🔄 Generando simulación 3D...</div>';
+
+              try {
+                const [samplesResponse, traceResponse] = await Promise.all([
+                  fetch("/sample", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                  }),
+                  fetch("/target-function-data", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                  })
+                ]);
+                if(!samplesResponse.ok || !traceResponse.ok) {
+                  throw new Error('Error en la respuesta del servidor');
+                }
+
+                const samplingResult = await samplesResponse.json();
+                const targetFunData = await traceResponse.json();
+
+                // Limpiar el área de la gráfica
+                grafica.innerHTML = "";
+
+                // --- Gráfica de puntos 3D (scatter) ---
+                
+              // --- Traza 1: Superficie de la función objetivo ---
+              const superficie = {
+              x: targetFunData.x_grid,
+              y: targetFunData.y_grid,
+              z: targetFunData.z_grid,
+              type: 'surface',
+              name: 'Función Objetivo',
+              colorscale: 'Viridis',
+              opacity: 0.7,
+              showscale: false // Ocultar la barra de color para no saturar
+            };
+
+            // --- Traza 2: Puntos del muestreo de Gibbs ---
+            // Para no sobrecargar el gráfico, mostramos solo una fracción de los puntos
+            const step = Math.max(1, Math.floor(samplingResult.x_samples.length / 1000));
+            const x_samples_subset = samplingResult.x_samples.filter((_, i) => i % step === 0);
+            const y_samples_subset = samplingResult.y_samples.filter((_, i) => i % step === 0);
+            
+            // Necesitamos calcular el valor Z para cada punto de la muestra para ubicarlo en la superficie
+            const z_samples = x_samples_subset.map((x, i) => {
+                // Esta es una aproximación simple. La función objetivo real no se expone al frontend.
+                // Podríamos añadir un endpoint para esto, pero por ahora los ponemos sobre la superficie.
+                // Para una visualización más precisa, la API debería devolver f(x,y) para cada muestra.
+                // Por simplicidad, los ponemos a una altura fija o sobre la superficie.
+                return 0; // O un valor Z calculado si lo tuvieras
+            });
+
+            const scatter3d = {
+              x: samplingResult.x_samples,
+              y: samplingResult.y_samples,
+              z: new Array(samplingResult.x_samples.length).fill(0), // Proyección en z=0
+              mode: 'markers',
+              type: 'scatter3d',
+              name: 'Muestras de Gibbs',
+              marker: { size: 2, color: 'rgba(255, 0, 0, 0.5)' } // Rojo con transparencia
+            };
+
+            // 6. Configurar el layout y crear el gráfico 3D
+            const layout3D = {
+              title: 'Muestreo de Gibbs y Función Objetivo',
+              scene: {
+                xaxis: { title: 'X' },
+                yaxis: { title: 'Y' },
+                zaxis: { title: 'f(X, Y)' }
+              },
+              margin: { l: 0, r: 0, b: 0, t: 40 }
+            };
+            Plotly.newPlot('chart', [superficie, scatter3d], layout3D, { responsive: true });
+          }
+          catch (error) {
+            grafica.innerHTML = '<div class="chart-placeholder">❌ Error al generar la simulación</div>';
+            console.error('Error:', error);
+          }
         });
-      }
+      } 
+          
     }
 
 

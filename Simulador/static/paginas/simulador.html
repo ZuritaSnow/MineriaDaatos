@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulador de Densidades</title>
   <link rel="stylesheet" href="/static/styles/style.css">
-  <!-- Estilos de Morris -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
 </head>
 
 <body>
@@ -225,9 +223,25 @@
         <!-- Contenido para Método de Gibbs -->
         <div class="distribution-content" id="gibbs">
           <div class="inputs-section">
+             <div class="input-group">
+              <label for="limite_inf">Limite inferior:</label>
+              <input type="number" id="limite_inf" value="0">
+            </div>
             <div class="input-group">
-              <label for="gibbs-iterations">Número de iteraciones:</label>
-              <input type="number" id="gibbs-iterations" min="100" value="1000">
+              <label for="limite_sup">Limite superior:</label>
+              <input type="number" id="limite_sup" value="2">
+            </div>
+            <div class="input-group">
+              <label for="x0">X:</label>
+              <input type="number" id="x0" value="0">
+            </div>
+            <div class="input-group">
+              <label for="y0">Y:</label>
+              <input type="number" id="y0" value="0">
+            </div>
+            <div class="input-group">
+              <label for="gibbs-iterations">Número de esperimentos:</label>
+              <input type="number" id="gibbs-iterations" min="0" value="1000">
             </div>
             <div class="input-group">
               <label for="gibbs-burnin">Período de calentamiento:</label>
