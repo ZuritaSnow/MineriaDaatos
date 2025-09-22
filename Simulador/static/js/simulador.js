@@ -467,7 +467,7 @@
       }
 
 
-      const verificarBtn = probaContent.querySelector('.btn-verif');
+      const verificarBtn = probaContent.querySelector('#btn-verif');
 
       if (verificarBtn && verificarBtn.textContent === 'Verificar') {
         verificarBtn.addEventListener('click', async () => {
