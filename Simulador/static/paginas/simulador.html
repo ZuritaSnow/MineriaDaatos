@@ -32,6 +32,7 @@
       <button class="nav-item" data-distribution="exponencial">Exponencial</button>
       <button class="nav-item" data-distribution="normal">Normal</button>
       <button class="nav-item" data-distribution="gibbs">Método de Gibbs</button>
+      <button class="nav-item" data-distribution="normal-bivariada">Normal Bivariada</button>
     </nav>
 
     <!-- Contenido principal -->
@@ -231,6 +232,40 @@
             <div class="input-group">
               <label for="gibbs-burnin">Período de calentamiento:</label>
               <input type="number" id="gibbs-burnin" min="0" value="100">
+            </div>
+          </div>
+          <div class="buttons-section">
+            <button class="btn-primary">Simular</button>
+            <button class="btn-primary">Limpiar</button>
+          </div>
+        </div>
+
+        <div class="distribution-content" id="normal-bivariada">
+          <div class="inputs-section">
+            <div class="input-group">
+              <label for="bivariada-mu-x">Media X (μₓ):</label>
+              <input type="number" id="bivariada-mu-x" step="0.1" value="0">
+            </div>
+            <div class="input-group">
+              <label for="bivariada-mu-y">Media Y (μᵧ):</label>
+              <input type="number" id="bivariada-mu-y" step="0.1" value="0">
+            </div>
+            <div class="input-group">
+              <label for="bivariada-sigma-x">Desviación X (σₓ):</label>
+              <input type="number" id="bivariada-sigma-x" min="0.01" step="0.1" value="1">
+            </div>
+            <div class="input-group">
+              <label for="bivariada-sigma-y">Desviación Y (σᵧ):</label>
+              <input type="number" id="bivariada-sigma-y" min="0.01" step="0.1" value="1">
+            </div>
+            <div class="input-group">
+              <label for="bivariada-rho">Correlación (ρ):</label>
+              <input type="number" id="bivariada-rho" min="-1" max="1" step="0.1" value="0.5">
+              <small>Valor entre -1 y 1</small>
+            </div>
+            <div class="input-group">
+              <label for="bivariada-n">Número de simulaciones:</label>
+              <input type="number" id="bivariada-n" min="100" value="1000">
             </div>
           </div>
           <div class="buttons-section">

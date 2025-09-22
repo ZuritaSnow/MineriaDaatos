@@ -66,7 +66,8 @@
         'multinomial': 'Distribución Multinomial',
         'exponencial': 'Distribución Exponencial',
         'normal': 'Distribución Normal',
-        'gibbs': 'Método de Gibbs'
+        'gibbs': 'Método de Gibbs',
+        'normal-bivariada': 'Distribucion Normal Bivariada'
       };
 
       navItems.forEach(item => {
@@ -101,6 +102,8 @@
       Exponential();
       Normal();
       Gibbs();
+      NormalBivariada();
+
 
       // Funcionalidad de los botones de limpiar
       const clearButtons = document.querySelectorAll('.btn-primary');
@@ -740,3 +743,180 @@
         });
       }
     }
+
+
+    function NormalBivariada() {
+  const normalBivariadaContent = document.getElementById('normal-bivariada');
+  const simulateBtn = normalBivariadaContent.querySelector('.btn-primary');
+  
+  if (simulateBtn && simulateBtn.textContent === 'Simular') {
+    simulateBtn.addEventListener('click', async () => {
+      const numExp = parseInt(document.getElementById('bivariada-n').value);
+      const muX = parseFloat(document.getElementById('bivariada-mu-x').value);
+      const muY = parseFloat(document.getElementById('bivariada-mu-y').value);
+      const sigmaX = parseFloat(document.getElementById('bivariada-sigma-x').value);
+      const sigmaY = parseFloat(document.getElementById('bivariada-sigma-y').value);
+      const rho = parseFloat(document.getElementById('bivariada-rho').value);
+
+      // Validaciones
+      if (!numExp || isNaN(muX) || isNaN(muY) || !sigmaX || !sigmaY || isNaN(rho)) {
+        alert('Por favor, completa todos los campos');
+        return;
+      }
+
+      if (rho < -1 || rho > 1) {
+        alert('El coeficiente de correlación debe estar entre -1 y 1');
+        return;
+      }
+
+      if (sigmaX <= 0 || sigmaY <= 0) {
+        alert('Las desviaciones estándar deben ser mayores que 0');
+        return;
+      }
+
+      grafica.innerHTML = '<div class="chart-placeholder">🔄 Generando simulación 3D...</div>';
+
+      try {
+        const response = await fetch("/normal_bivariada", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            num_experimentos: numExp,
+            mu_x: muX,
+            mu_y: muY,
+            sigma_x: sigmaX,
+            sigma_y: sigmaY,
+            rho: rho
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.error) {
+          alert('Error: ' + result.error);
+          return;
+        }
+
+        // Limpiar el área de la gráfica
+        grafica.innerHTML = "";
+
+        // --- Gráfica de puntos 3D (scatter) ---
+        const scatter3d = {
+          x: result.valores_x,
+          y: result.valores_y,
+          z: new Array(result.valores_x.length).fill(0), // puntos en z=0
+          mode: 'markers',
+          type: 'scatter3d',
+          name: 'Datos simulados',
+          marker: {
+            size: 3,
+            color: result.valores_x,
+            colorscale: 'Viridis',
+            opacity: 0.6
+          }
+        };
+
+        // --- Superficie teórica 3D ---
+        const superficie = {
+          x: result.superficie_teorica.x,
+          y: result.superficie_teorica.y,
+          z: result.superficie_teorica.z,
+          type: 'surface',
+          name: 'Densidad teórica',
+          colorscale: [
+            [0, 'rgb(68,1,84)'],     // violeta oscuro
+            [0.2, 'rgb(59,82,139)'], // azul
+            [0.4, 'rgb(33,145,140)'], // verde azulado
+            [0.6, 'rgb(94,201,98)'], // verde
+            [0.8, 'rgb(186,222,40)'], // verde amarillo
+            [1, 'rgb(253,231,37)']   // amarillo
+          ],
+          opacity: 0.8,
+          contours: {
+            z: {
+              show: true,
+              usecolormap: true,
+              highlightcolor: "limegreen",
+              project: {z: true}
+            }
+          }
+        };
+
+        const layout = {
+          title: {
+            text: `Normal Bivariada (μₓ=${muX}, μᵧ=${muY}, σₓ=${sigmaX}, σᵧ=${sigmaY}, ρ=${rho})`,
+            font: { size: 18 }
+          },
+          scene: {
+            xaxis: {
+              title: 'X',
+              gridcolor: 'rgb(255, 255, 255)',
+              zerolinecolor: 'rgb(255, 255, 255)',
+              showbackground: true,
+              backgroundcolor: 'rgb(230, 230,230)'
+            },
+            yaxis: {
+              title: 'Y',
+              gridcolor: 'rgb(255, 255, 255)',
+              zerolinecolor: 'rgb(255, 255, 255)',
+              showbackground: true,
+              backgroundcolor: 'rgb(230, 230,230)'
+            },
+            zaxis: {
+              title: 'Densidad',
+              gridcolor: 'rgb(255, 255, 255)',
+              zerolinecolor: 'rgb(255, 255, 255)',
+              showbackground: true,
+              backgroundcolor: 'rgb(230, 230,230)'
+            },
+            camera: {
+              eye: {x: 1.5, y: 1.5, z: 1.5}
+            }
+          },
+          margin: {
+            l: 0,
+            r: 0,
+            b: 0,
+            t: 50
+          }
+        };
+
+        // Crear la gráfica con ambos trazos
+        Plotly.newPlot('chart', [superficie, scatter3d], layout, {
+          responsive: true,
+          displayModeBar: true
+        });
+
+        // Mostrar estadísticas
+        const obs = result.estadisticas_observadas;
+        const params = result.parametros;
+        
+        resultados.innerHTML = `
+          <h3>Parámetros teóricos:</h3>
+          <p><b>Media X:</b> ${params.mu_x}</p>
+          <p><b>Media Y:</b> ${params.mu_y}</p>
+          <p><b>Desviación X:</b> ${params.sigma_x}</p>
+          <p><b>Desviación Y:</b> ${params.sigma_y}</p>
+          <p><b>Correlación:</b> ${params.rho}</p>
+          <p><b>Simulaciones:</b> ${params.num_experimentos}</p>
+          
+          <h3>Estadísticas observadas:</h3>
+          <p><b>Media X observada:</b> ${obs.media_x.toFixed(3)}</p>
+          <p><b>Media Y observada:</b> ${obs.media_y.toFixed(3)}</p>
+          <p><b>Desviación X observada:</b> ${obs.sigma_x.toFixed(3)}</p>
+          <p><b>Desviación Y observada:</b> ${obs.sigma_y.toFixed(3)}</p>
+          <p><b>Correlación observada:</b> ${obs.rho.toFixed(3)}</p>
+          
+          <h3>Errores:</h3>
+          <p><b>Error en media X:</b> ${Math.abs(params.mu_x - obs.media_x).toFixed(3)}</p>
+          <p><b>Error en media Y:</b> ${Math.abs(params.mu_y - obs.media_y).toFixed(3)}</p>
+          <p><b>Error en correlación:</b> ${Math.abs(params.rho - obs.rho).toFixed(3)}</p>
+        `;
+
+      } catch (error) {
+        grafica.innerHTML = '<div class="chart-placeholder">❌ Error al generar la simulación</div>';
+        console.error('Error:', error);
+      }
+    });
+  }
+}

@@ -514,3 +514,149 @@ async def normal(data: NormalInput):
     }
 
 
+'''
+Endpoint para el simulador de Normal Bivariada
+'''
+class NormalBivariadaInput(BaseModel):
+    num_experimentos: int
+    mu_x: float
+    mu_y: float
+    sigma_x: float
+    sigma_y: float
+    rho: float  # coeficiente de correlación
+
+def generar_normal_bivariada(n, mu_x, mu_y, sigma_x, sigma_y, rho):
+    """
+    Genera muestras de una distribución normal bivariada usando Box-Muller
+    """
+    valores_x = []
+    valores_y = []
+    
+    for _ in range(n):
+        # Generar dos números aleatorios independientes N(0,1)
+        u1 = random.random()
+        u2 = random.random()
+        
+        # Box-Muller para generar Z1 y Z2 independientes N(0,1)
+        z1 = math.sqrt(-2 * math.log(u1)) * math.cos(2 * math.pi * u2)
+        z2 = math.sqrt(-2 * math.log(u1)) * math.sin(2 * math.pi * u2)
+        
+        # Transformar a normal bivariada correlacionada
+        x = mu_x + sigma_x * z1
+        y = mu_y + sigma_y * (rho * z1 + math.sqrt(1 - rho**2) * z2)
+        
+        valores_x.append(x)
+        valores_y.append(y)
+    
+    return valores_x, valores_y
+
+def calcular_densidad_bivariada_teorica(x_range, y_range, mu_x, mu_y, sigma_x, sigma_y, rho):
+    """
+    Calcula la función de densidad teórica para una malla de puntos
+    """
+    # Crear mallas
+    X, Y = np.meshgrid(x_range, y_range)
+    
+    # Calcular determinante de la matriz de covarianza
+    det_sigma = sigma_x**2 * sigma_y**2 * (1 - rho**2)
+    
+    # Constante de normalización
+    coef = 1 / (2 * math.pi * math.sqrt(det_sigma))
+    
+    # Calcular el exponente
+    dx = X - mu_x
+    dy = Y - mu_y
+    
+    exponente = -0.5 * (1 / (1 - rho**2)) * (
+        (dx**2) / (sigma_x**2) + 
+        (dy**2) / (sigma_y**2) - 
+        2 * rho * dx * dy / (sigma_x * sigma_y)
+    )
+    
+    # Función de densidad
+    Z = coef * np.exp(exponente)
+    
+    return X.tolist(), Y.tolist(), Z.tolist()
+
+@simulador.post("/normal_bivariada")
+async def normal_bivariada(data: NormalBivariadaInput):
+    # Validaciones
+    if data.sigma_x <= 0 or data.sigma_y <= 0:
+        return {"error": "Las desviaciones estándar deben ser mayores que 0"}
+    
+    if not (-1 <= data.rho <= 1):
+        return {"error": "El coeficiente de correlación debe estar entre -1 y 1"}
+    
+    if data.num_experimentos <= 0:
+        return {"error": "El número de experimentos debe ser mayor que 0"}
+
+    try:
+        # Generar datos
+        valores_x, valores_y = generar_normal_bivariada(
+            data.num_experimentos, 
+            data.mu_x, 
+            data.mu_y, 
+            data.sigma_x, 
+            data.sigma_y, 
+            data.rho
+        )
+        
+        # Calcular estadísticas observadas
+        media_x_obs = sum(valores_x) / len(valores_x)
+        media_y_obs = sum(valores_y) / len(valores_y)
+        
+        var_x_obs = sum([(x - media_x_obs)**2 for x in valores_x]) / len(valores_x)
+        var_y_obs = sum([(y - media_y_obs)**2 for y in valores_y]) / len(valores_y)
+        
+        sigma_x_obs = math.sqrt(var_x_obs)
+        sigma_y_obs = math.sqrt(var_y_obs)
+        
+        # Coeficiente de correlación observado
+        cov_obs = sum([(valores_x[i] - media_x_obs) * (valores_y[i] - media_y_obs) 
+                      for i in range(len(valores_x))]) / len(valores_x)
+        rho_obs = cov_obs / (sigma_x_obs * sigma_y_obs)
+        
+        # Crear malla para la función teórica
+        min_x, max_x = min(valores_x), max(valores_x)
+        min_y, max_y = min(valores_y), max(valores_y)
+        
+        # Expandir un poco el rango
+        range_x = max_x - min_x
+        range_y = max_y - min_y
+        
+        x_range = np.linspace(min_x - 0.2 * range_x, max_x + 0.2 * range_x, 50)
+        y_range = np.linspace(min_y - 0.2 * range_y, max_y + 0.2 * range_y, 50)
+        
+        # Calcular densidad teórica
+        X_teorica, Y_teorica, Z_teorica = calcular_densidad_bivariada_teorica(
+            x_range, y_range, data.mu_x, data.mu_y, data.sigma_x, data.sigma_y, data.rho
+        )
+        
+        return {
+            "valores_x": valores_x,
+            "valores_y": valores_y,
+            "parametros": {
+                "mu_x": data.mu_x,
+                "mu_y": data.mu_y,
+                "sigma_x": data.sigma_x,
+                "sigma_y": data.sigma_y,
+                "rho": data.rho,
+                "num_experimentos": data.num_experimentos
+            },
+            "estadisticas_observadas": {
+                "media_x": media_x_obs,
+                "media_y": media_y_obs,
+                "sigma_x": sigma_x_obs,
+                "sigma_y": sigma_y_obs,
+                "rho": rho_obs
+            },
+            "superficie_teorica": {
+                "x": X_teorica,
+                "y": Y_teorica,
+                "z": Z_teorica
+            }
+        }
+        
+    except Exception as e:
+        return {"error": f"Error en la simulación: {str(e)}"}
+
